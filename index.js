@@ -27,16 +27,39 @@ async function run() {
     const menuCollection = client.db("bistro").collection("manu");
     const reviewCollection = client.db("bistro").collection("reviews");
     const cartCollection = client.db("bistro").collection("carts");
+    const usersCollection = client.db("bistro").collection("users");
 
+    // users api 
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+
+    app.post('/users', async (req, res) => {
+      const item = req.body;
+      const query = { email:  item.email}
+      const existingUser = await usersCollection.findOne(query);
+      if(existingUser) {
+        return res.send({ message : 'user already exists'})
+      }
+
+      const result = await usersCollection.insertOne(item);
+      res.send(result);
+    })
+
+
+    // menu api
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result);
     });
+    //reviews  api
     app.get("/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     });
-    // cartCollection
+    // cartCollection api
     app.get('/carts', async (req, res) => {
       const email = req.query.email;
 
@@ -57,7 +80,6 @@ async function run() {
 
     app.post('/carts', async (req, res) => {
       const item = req.body;
-      console.log(item);
       const result = await cartCollection.insertOne(item);
       res.send(result);
     })
